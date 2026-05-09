@@ -28,12 +28,14 @@ library(tidytext)
 library(stringr)
 library(tidyr)
 library(caret)
+library(tidytext)
+library(lubridate)
+library(tibble)
 ```
 
-## Including Plots
+## Data Frames
 
-You can also embed plots, for example:
-
+Now, we will load the data frames of 
 ```{r pressure, echo=FALSE}
 plot(pressure)
 ```
