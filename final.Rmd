@@ -25,6 +25,9 @@ library(tidyverse)
 library(modeldata)
 library(rpart.plot)
 library(tidytext)
+library(stringr)
+library(tidyr)
+library(caret)
 ```
 
 ## Including Plots
