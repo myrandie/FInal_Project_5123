@@ -117,7 +117,8 @@ following order:
 - remove stopwords
 - lemmatize (reduce words to stem. for example, ‘playing’ would become
   ‘play’)
-- TF-IDF
+- TF-IDF (high tf-idf means words that appear a lot in one movide but
+  rarely across others)
 
 Before starting any text operations, I have noticed that some
 descriptions don’t have the full descriptions in the original data and
@@ -139,6 +140,16 @@ movies_cleaned_descriptions <- filtered_movies %>%
          description = str_remove_all(description, "[\"']")) #remove the single and double quotations
 ```
 
+I’ve noticed that some movies still appeared across genres, since a
+movie that is labeled as ‘Action, Adventure.’ would appear in both csvs.
+And, since I will be using single label classification, I decided to
+only keep the first occurance of each movie.
+
+``` r
+movies_cleaned_descriptions <- movies_cleaned_descriptions %>%
+  distinct(movie_id, .keep_all = TRUE)
+```
+
 Now that we’ve cleaned those, we will start text cleaning by using
 tidytext.
 
@@ -152,24 +163,25 @@ text_movies <- movies_cleaned_descriptions %>%
   filter(!grepl('[0-9]', word)) %>%
   anti_join(stop_words) 
   
-tibble(text_movies) %>%
-  mutate(lemma = lemmatize_words(word)) %>% #now we will lemmatize
-  print(n = 10)
+lemmatized_movies <- tibble(text_movies) %>%
+  mutate(word = lemmatize_words(word)) %>% #now we will lemmatize the words
+  count(movie_id, movie_name, word, final_genre, sort = TRUE) %>%
+  bind_tf_idf(movie_name, word, n) %>%
+  arrange(desc(tf_idf))
+lemmatized_movies
 ```
 
-    ## # A tibble: 3,356,905 × 5
-    ##    movie_id  movie_name                     final_genre word        lemma    
-    ##    <chr>     <chr>                          <chr>       <chr>       <chr>    
-    ##  1 tt9114286 Black Panther: Wakanda Forever action      people      people   
-    ##  2 tt9114286 Black Panther: Wakanda Forever action      wakanda     wakanda  
-    ##  3 tt9114286 Black Panther: Wakanda Forever action      fight       fight    
-    ##  4 tt9114286 Black Panther: Wakanda Forever action      protect     protect  
-    ##  5 tt9114286 Black Panther: Wakanda Forever action      home        home     
-    ##  6 tt9114286 Black Panther: Wakanda Forever action      intervening intervene
-    ##  7 tt9114286 Black Panther: Wakanda Forever action      world       world    
-    ##  8 tt9114286 Black Panther: Wakanda Forever action      powers      power    
-    ##  9 tt9114286 Black Panther: Wakanda Forever action      mourn       mourn    
-    ## 10 tt9114286 Black Panther: Wakanda Forever action      death       death    
-    ## # ℹ 3,356,895 more rows
-
-Now, we will lemmatize the words.
+    ## # A tibble: 2,280,653 × 8
+    ##    movie_id   movie_name          word      final_genre     n    tf   idf tf_idf
+    ##    <chr>      <chr>               <chr>     <chr>       <int> <dbl> <dbl>  <dbl>
+    ##  1 tt0357912  Mohar               kxdhjdix… family          1     1  11.5   11.5
+    ##  2 tt11690880 Adventure Night     tbd       adventure       1     1  11.5   11.5
+    ##  3 tt1207994  Tanikalang dugo     sssshhhh… horror          1     1  11.5   11.5
+    ##  4 tt14246472 Sommerland          sommerla… horror          1     1  11.5   11.5
+    ##  5 tt2445788  Arkadas             senderöe  thriller        1     1  11.5   11.5
+    ##  6 tt3395582  Sun Choke           janies    horror          1     1  11.5   11.5
+    ##  7 tt7472110  a new test          alksjdhf… war             1     1  11.5   11.5
+    ##  8 tt0053941  The White Horse Inn rössl     romance         1     1  10.8   10.8
+    ##  9 tt0085789  Kiez                kiez      crime           1     1  10.8   10.8
+    ## 10 tt0270224  Bang-bang boomerang duckhunt… animation       1     1  10.8   10.8
+    ## # ℹ 2,280,643 more rows
