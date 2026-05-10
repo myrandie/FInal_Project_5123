@@ -5,6 +5,7 @@ miranda_moe
 
 - [Packages](#packages)
 - [Data Frames](#data-frames)
+- [Text cleaning](#text-cleaning)
 
 In this project, we will if we can build a classification model to learn
 features of model descriptions to predict genre it represents. We will
@@ -94,6 +95,8 @@ head(movies, 10)
     ##  9 tt1016150  All Quiet on the Western Front    A young German sold… action     
     ## 10 tt1745960  Top Gun: Maverick                 After thirty years,… action
 
+## Text cleaning
+
 When I look through the new dataframe “movies”, I noticed that some
 movies are missing descriptions (which happens across genres.) Those
 missing movie descriptions are indicated as “Add a Plot” rather than NA
@@ -105,30 +108,26 @@ filtered_movies <- movies %>%
   filter(!grepl("Add a Plot", description))
 ```
 
-Here, we will do some basic text analysis, such as removing stopwords,
-punctuations, tokenizations, changing to lowercases
+Here, we will do some basic text analysis, we will do that in the
+following order: - tokenize - remove stopwords - remove numbers -
+lemmatize - TF-IDF
 
 Before starting any text operations, I have noticed that some
 descriptions don’t have the full descriptions in the original data and
-at the end, it would say ” See full summary »“. Therefore, we will
-remove them first.
+at the end, it would say ” See full summary »“. And, we also have
+parantheses in descriptions that would include years (for example,
+spinoff from a movie name (2018), or a character name with an action
+name in parantheses). I assumed those weren’t super necessary for the
+model to learn the features. And, there are periods between words such
+as L.A. or C.I.A, and tokenization might split them, which might not
+result in a meaningful result. There are also single and double
+quotation marks around names, which we will also get rid of. Therefore,
+in the following steps we will remove those by using stringr functions.
 
 ``` r
-filtered_movies %>%
-  mutate(description = str_remove(description, "See full summary.*$"))
+movies_cleaned_descriptions <- filtered_movies %>%
+  mutate(description = str_remove(description, "See full summary.*$"),
+         description = str_remove_all(description, "\\s*\\([^\\)]+\\)"), #remove paratheses
+         description = str_remove_all(description, "(?<=[A-Za-z])\\.(?=[A-Za-z])"), #remove periods
+         description = str_remove_all(description, "[\"']")) #remove the single and double quotations
 ```
-
-    ## # A tibble: 256,650 × 4
-    ##    movie_id   movie_name                        description          final_genre
-    ##    <chr>      <chr>                             <chr>                <chr>      
-    ##  1 tt9114286  Black Panther: Wakanda Forever    The people of Wakan… action     
-    ##  2 tt1630029  Avatar: The Way of Water          Jake Sully lives wi… action     
-    ##  3 tt5884796  Plane                             A pilot finds himse… action     
-    ##  4 tt6710474  Everything Everywhere All at Once A middle-aged Chine… action     
-    ##  5 tt5433140  Fast X                            Dom Toretto and his… action     
-    ##  6 tt10954600 Ant-Man and the Wasp: Quantumania Scott Lang and Hope… action     
-    ##  7 tt9686790  Shotgun Wedding                   Darcy and Tom gathe… action     
-    ##  8 tt12593682 Bullet Train                      Five assassins aboa… action     
-    ##  9 tt1016150  All Quiet on the Western Front    A young German sold… action     
-    ## 10 tt1745960  Top Gun: Maverick                 After thirty years,… action     
-    ## # ℹ 256,640 more rows
