@@ -60,7 +60,7 @@ movies <- bind_rows(movies_list)
 head(movies, 10)
 ```
 
-# Text cleaning 
+## Text cleaning 
 
 When I look through the new dataframe "movies", I noticed that some movies are missing descriptions (which happens across genres.) Those missing movie descriptions are indicated as "Add a Plot" rather than NA or blank cells. Therefore, we will remove those movies so it wouldn't mess up the classification. 
 
