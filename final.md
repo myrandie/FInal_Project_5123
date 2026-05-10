@@ -75,137 +75,60 @@ movies_list <- lapply(file_list, function(f) {
     select(movie_id, movie_name, description, final_genre)
   df
 })
+
+movies <- bind_rows(movies_list)
+head(movies, 10)
 ```
 
-    ## Rows: 52452 Columns: 14
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr (11): movie_id, movie_name, year, certificate, runtime, genre, descripti...
-    ## dbl  (3): rating, votes, gross(in $)
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-    ## Rows: 25664 Columns: 14
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr (11): movie_id, movie_name, year, certificate, runtime, genre, descripti...
-    ## dbl  (3): rating, votes, gross(in $)
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-    ## Rows: 8419 Columns: 14
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr (11): movie_id, movie_name, year, certificate, runtime, genre, descripti...
-    ## dbl  (3): rating, votes, gross(in $)
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-    ## Rows: 8289 Columns: 14
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr (11): movie_id, movie_name, year, certificate, runtime, genre, descripti...
-    ## dbl  (3): rating, votes, gross(in $)
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-    ## Rows: 35852 Columns: 14
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr (11): movie_id, movie_name, year, certificate, runtime, genre, descripti...
-    ## dbl  (3): rating, votes, gross(in $)
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-    ## Rows: 17095 Columns: 14
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr (11): movie_id, movie_name, year, certificate, runtime, genre, descripti...
-    ## dbl  (3): rating, votes, gross(in $)
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-    ## Rows: 17163 Columns: 14
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr (11): movie_id, movie_name, year, certificate, runtime, genre, descripti...
-    ## dbl  (3): rating, votes, gross(in $)
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-    ## Rows: 986 Columns: 14
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr (10): movie_id, movie_name, certificate, runtime, genre, description, di...
-    ## dbl  (4): year, rating, votes, gross(in $)
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-    ## Rows: 8996 Columns: 14
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr (11): movie_id, movie_name, year, certificate, runtime, genre, descripti...
-    ## dbl  (3): rating, votes, gross(in $)
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-    ## Rows: 36682 Columns: 14
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr (11): movie_id, movie_name, year, certificate, runtime, genre, descripti...
-    ## dbl  (3): rating, votes, gross(in $)
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-    ## Rows: 18960 Columns: 14
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr (11): movie_id, movie_name, year, certificate, runtime, genre, descripti...
-    ## dbl  (3): rating, votes, gross(in $)
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-    ## Rows: 52617 Columns: 14
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr (11): movie_id, movie_name, year, certificate, runtime, genre, descripti...
-    ## dbl  (3): rating, votes, gross(in $)
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-    ## Rows: 16557 Columns: 14
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr (11): movie_id, movie_name, year, certificate, runtime, genre, descripti...
-    ## dbl  (3): rating, votes, gross(in $)
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-    ## Rows: 5292 Columns: 14
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr (11): movie_id, movie_name, year, certificate, runtime, genre, descripti...
-    ## dbl  (3): rating, votes, gross(in $)
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-    ## Rows: 53365 Columns: 14
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr (11): movie_id, movie_name, year, certificate, runtime, genre, descripti...
-    ## dbl  (3): rating, votes, gross(in $)
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-    ## Rows: 9911 Columns: 14
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr (11): movie_id, movie_name, year, certificate, runtime, genre, descripti...
-    ## dbl  (3): rating, votes, gross(in $)
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+    ## # A tibble: 10 × 4
+    ##    movie_id   movie_name                        description          final_genre
+    ##    <chr>      <chr>                             <chr>                <chr>      
+    ##  1 tt9114286  Black Panther: Wakanda Forever    The people of Wakan… action     
+    ##  2 tt1630029  Avatar: The Way of Water          Jake Sully lives wi… action     
+    ##  3 tt5884796  Plane                             A pilot finds himse… action     
+    ##  4 tt6710474  Everything Everywhere All at Once A middle-aged Chine… action     
+    ##  5 tt5433140  Fast X                            Dom Toretto and his… action     
+    ##  6 tt10954600 Ant-Man and the Wasp: Quantumania Scott Lang and Hope… action     
+    ##  7 tt9686790  Shotgun Wedding                   Darcy and Tom gathe… action     
+    ##  8 tt12593682 Bullet Train                      Five assassins aboa… action     
+    ##  9 tt1016150  All Quiet on the Western Front    A young German sold… action     
+    ## 10 tt1745960  Top Gun: Maverick                 After thirty years,… action
+
+When I look through the new dataframe “movies”, I noticed that some
+movies are missing descriptions (which happens across genres.) Those
+missing movie descriptions are indicated as “Add a Plot” rather than NA
+or blank cells. Therefore, we will remove those movies so it wouldn’t
+mess up the classification.
 
 ``` r
-movies <- bind_rows(movies_list)
+filtered_movies <- movies %>%
+  filter(!grepl("Add a Plot", description))
 ```
+
+Here, we will do some basic text analysis, such as removing stopwords,
+punctuations, tokenizations, changing to lowercases
+
+Before starting any text operations, I have noticed that some
+descriptions don’t have the full descriptions in the original data and
+at the end, it would say ” See full summary »“. Therefore, we will
+remove them first.
+
+``` r
+filtered_movies %>%
+  mutate(description = str_remove(description, "See full summary.*$"))
+```
+
+    ## # A tibble: 256,650 × 4
+    ##    movie_id   movie_name                        description          final_genre
+    ##    <chr>      <chr>                             <chr>                <chr>      
+    ##  1 tt9114286  Black Panther: Wakanda Forever    The people of Wakan… action     
+    ##  2 tt1630029  Avatar: The Way of Water          Jake Sully lives wi… action     
+    ##  3 tt5884796  Plane                             A pilot finds himse… action     
+    ##  4 tt6710474  Everything Everywhere All at Once A middle-aged Chine… action     
+    ##  5 tt5433140  Fast X                            Dom Toretto and his… action     
+    ##  6 tt10954600 Ant-Man and the Wasp: Quantumania Scott Lang and Hope… action     
+    ##  7 tt9686790  Shotgun Wedding                   Darcy and Tom gathe… action     
+    ##  8 tt12593682 Bullet Train                      Five assassins aboa… action     
+    ##  9 tt1016150  All Quiet on the Western Front    A young German sold… action     
+    ## 10 tt1745960  Top Gun: Maverick                 After thirty years,… action     
+    ## # ℹ 256,640 more rows
