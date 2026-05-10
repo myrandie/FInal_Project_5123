@@ -36,10 +36,26 @@ library(tibble)
 
 ## Data Frames
 
-Now, we will load the csvs.
+Now, we will load the csvs. First, we would need to load every file that ends with csv. 
 
 ```{r pressure, echo=TRUE}
-
+file_list <- list.files(pattern = "*.csv")
+file_list
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+From raw data exploration, I have noticed that some movies have multiple genre listed. To resolve the issue of multiple labeling, I only kept movies where the CSV's genre appeared somewhere in the movie's genre list. For example, a movie with genres listed as "Animation, Adventure, Comedy" would be kept in animation.csv but excluded from adventure.csv if "Adventure" was not the intended label. This ensures each movie is only included when it genuinely belongs to that genre category.
+To combine all 16 CSVs into a single dataframe, I used lapply() to loop through each file. For each file, I extracted the genre label from the filename by removing the .csv extension using gsub(), filtered rows using str_detect() to keep only movies matching that genre, added a new column final_genre to store the label, and selected only the relevant columns (movie_id, movie_name, description, final_genre). All the movies are now binded into one dataframe. 
+
+```{r}
+movies_list <- lapply(file_list, function(f) {
+  genre_name <- gsub(".csv", "", f)
+  df <- read_csv(f) |>
+    filter(str_detect(str_to_lower(genre), genre_name)) |>
+    mutate(final_genre = genre_name) |>
+    select(movie_id, movie_name, description, final_genre)
+  df
+})
+
+movies <- bind_rows(movies_list)
+```
+
