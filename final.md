@@ -35,6 +35,7 @@ library(caret)
 library(tidytext)
 library(lubridate)
 library(tibble)
+library(textstem)
 ```
 
 ## Data Frames
@@ -114,7 +115,8 @@ following order:
 - tokenize
 - remove numbers (mostly just years, such as 2018, 2019 etc)
 - remove stopwords
-- lemmatize
+- lemmatize (reduce words to stem. for example, ‘playing’ would become
+  ‘play’)
 - TF-IDF
 
 Before starting any text operations, I have noticed that some
@@ -140,7 +142,9 @@ movies_cleaned_descriptions <- filtered_movies %>%
 Now that we’ve cleaned those, we will start text cleaning by using
 tidytext.
 
-First step is tokenizing.
+First step is tokenizing, removing stopwords and numbers. We will also
+convert the dataframe to tibbles before lemmatizing because tidyverse
+handles tibbles better and it will give us one token per row.
 
 ``` r
 text_movies <- movies_cleaned_descriptions %>%
@@ -149,20 +153,23 @@ text_movies <- movies_cleaned_descriptions %>%
   anti_join(stop_words) 
   
 tibble(text_movies) %>%
+  mutate(lemma = lemmatize_words(word)) %>% #now we will lemmatize
   print(n = 10)
 ```
 
-    ## # A tibble: 3,356,905 × 4
-    ##    movie_id  movie_name                     final_genre word       
-    ##    <chr>     <chr>                          <chr>       <chr>      
-    ##  1 tt9114286 Black Panther: Wakanda Forever action      people     
-    ##  2 tt9114286 Black Panther: Wakanda Forever action      wakanda    
-    ##  3 tt9114286 Black Panther: Wakanda Forever action      fight      
-    ##  4 tt9114286 Black Panther: Wakanda Forever action      protect    
-    ##  5 tt9114286 Black Panther: Wakanda Forever action      home       
-    ##  6 tt9114286 Black Panther: Wakanda Forever action      intervening
-    ##  7 tt9114286 Black Panther: Wakanda Forever action      world      
-    ##  8 tt9114286 Black Panther: Wakanda Forever action      powers     
-    ##  9 tt9114286 Black Panther: Wakanda Forever action      mourn      
-    ## 10 tt9114286 Black Panther: Wakanda Forever action      death      
+    ## # A tibble: 3,356,905 × 5
+    ##    movie_id  movie_name                     final_genre word        lemma    
+    ##    <chr>     <chr>                          <chr>       <chr>       <chr>    
+    ##  1 tt9114286 Black Panther: Wakanda Forever action      people      people   
+    ##  2 tt9114286 Black Panther: Wakanda Forever action      wakanda     wakanda  
+    ##  3 tt9114286 Black Panther: Wakanda Forever action      fight       fight    
+    ##  4 tt9114286 Black Panther: Wakanda Forever action      protect     protect  
+    ##  5 tt9114286 Black Panther: Wakanda Forever action      home        home     
+    ##  6 tt9114286 Black Panther: Wakanda Forever action      intervening intervene
+    ##  7 tt9114286 Black Panther: Wakanda Forever action      world       world    
+    ##  8 tt9114286 Black Panther: Wakanda Forever action      powers      power    
+    ##  9 tt9114286 Black Panther: Wakanda Forever action      mourn       mourn    
+    ## 10 tt9114286 Black Panther: Wakanda Forever action      death       death    
     ## # ℹ 3,356,895 more rows
+
+Now, we will lemmatize the words.
