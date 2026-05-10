@@ -109,8 +109,13 @@ filtered_movies <- movies %>%
 ```
 
 Here, we will do some basic text analysis, we will do that in the
-following order: - tokenize - remove stopwords - remove numbers -
-lemmatize - TF-IDF
+following order:
+
+- tokenize
+- remove numbers (mostly just years, such as 2018, 2019 etc)
+- remove stopwords
+- lemmatize
+- TF-IDF
 
 Before starting any text operations, I have noticed that some
 descriptions don’t have the full descriptions in the original data and
@@ -131,3 +136,33 @@ movies_cleaned_descriptions <- filtered_movies %>%
          description = str_remove_all(description, "(?<=[A-Za-z])\\.(?=[A-Za-z])"), #remove periods
          description = str_remove_all(description, "[\"']")) #remove the single and double quotations
 ```
+
+Now that we’ve cleaned those, we will start text cleaning by using
+tidytext.
+
+First step is tokenizing.
+
+``` r
+text_movies <- movies_cleaned_descriptions %>%
+  unnest_tokens(word, description) %>%
+  filter(!grepl('[0-9]', word)) %>%
+  anti_join(stop_words) 
+  
+tibble(text_movies) %>%
+  print(n = 10)
+```
+
+    ## # A tibble: 3,356,905 × 4
+    ##    movie_id  movie_name                     final_genre word       
+    ##    <chr>     <chr>                          <chr>       <chr>      
+    ##  1 tt9114286 Black Panther: Wakanda Forever action      people     
+    ##  2 tt9114286 Black Panther: Wakanda Forever action      wakanda    
+    ##  3 tt9114286 Black Panther: Wakanda Forever action      fight      
+    ##  4 tt9114286 Black Panther: Wakanda Forever action      protect    
+    ##  5 tt9114286 Black Panther: Wakanda Forever action      home       
+    ##  6 tt9114286 Black Panther: Wakanda Forever action      intervening
+    ##  7 tt9114286 Black Panther: Wakanda Forever action      world      
+    ##  8 tt9114286 Black Panther: Wakanda Forever action      powers     
+    ##  9 tt9114286 Black Panther: Wakanda Forever action      mourn      
+    ## 10 tt9114286 Black Panther: Wakanda Forever action      death      
+    ## # ℹ 3,356,895 more rows

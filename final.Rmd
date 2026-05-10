@@ -70,9 +70,10 @@ filtered_movies <- movies %>%
 ```
 
 Here, we will do some basic text analysis, we will do that in the following order:
+
 - tokenize
+- remove numbers (mostly just years, such as 2018, 2019 etc)
 - remove stopwords
-- remove numbers
 - lemmatize
 - TF-IDF
 
@@ -89,9 +90,19 @@ movies_cleaned_descriptions <- filtered_movies %>%
 
 Now that we've cleaned those, we will start text cleaning by using tidytext.
 
-```{r text cleaning, message=FALSE}
+First step is tokenizing. 
+
+```{r text cleaning with tidytext, message=FALSE}
 text_movies <- movies_cleaned_descriptions %>%
-  unnest_tokens(word, description)
-head(text_movies, 10)
+  unnest_tokens(word, description) %>%
+  filter(!grepl('[0-9]', word)) %>%
+  anti_join(stop_words) 
+  
+tibble(text_movies) %>%
+  print(n = 10)
 ```
+
+
+
+
 
