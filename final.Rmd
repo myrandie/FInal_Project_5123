@@ -87,3 +87,11 @@ movies_cleaned_descriptions <- filtered_movies %>%
 ```
 
 
+Now that we've cleaned those, we will start text cleaning by using tidytext.
+
+```{r text cleaning, message=FALSE}
+text_movies <- movies_cleaned_descriptions %>%
+  unnest_tokens(word, description)
+head(text_movies, 10)
+```
+
