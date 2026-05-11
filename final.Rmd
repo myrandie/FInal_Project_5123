@@ -169,7 +169,7 @@ head(dtm_df, 2)
 Now that we've prepared the dataframe, we will proceed with building the model. 
 
 ## Building Classification Model
-
+### Identifying the outcome
 First, we will change the outcome variable into a factor
 
 ```{r factor, message=FALSE}
@@ -178,4 +178,24 @@ dtm_df$final_genre <- factor(dtm_df$final_genre)
 levels(dtm_df$final_genre)
 ```
 
+The outcome variable has 16 levels. Therefore, it is a multiclass classification problem.
+
+### Examine the class balance
+
+```{r}
+table(dtm_df$final_genre)
+```
+
+Now, we will create a bar graph for genres
+
+```{r}
+ggplot(dtm_df, aes(x = final_genre, fill = factor(final_genre))) +
+  geom_bar() +
+  theme_minimal() +
+  labs(
+    title = "Bar Graphs for Different Genres",
+    ylab = "Count",
+    fill = "Genres of movies"
+  )
+```
 

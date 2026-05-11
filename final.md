@@ -387,6 +387,8 @@ model.
 
 ## Building Classification Model
 
+### Identifying the outcome
+
 First, we will change the outcome variable into a factor
 
 ``` r
@@ -403,3 +405,6 @@ levels(dtm_df$final_genre)
     ##  [1] "action"    "adventure" "animation" "biography" "crime"     "family"   
     ##  [7] "fantasy"   "film-noir" "history"   "horror"    "mystery"   "romance"  
     ## [13] "scifi"     "sports"    "thriller"  "war"
+
+The outcome variable has 16 levels. Therefore, it is a multiclass
+classification problem.
