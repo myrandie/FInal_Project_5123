@@ -192,10 +192,24 @@ Now, we will create a bar graph for genres
 ggplot(dtm_df, aes(x = final_genre, fill = factor(final_genre))) +
   geom_bar() +
   theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(
     title = "Bar Graphs for Different Genres",
     ylab = "Count",
     fill = "Genres of movies"
   )
+```
+
+As we can see in the bar graph and table above, this dataset is not balanced. When class imbalance happens, the accuracy could be misleading because the common class (such as action) would be more represented than other classes during data training. Therefore, the results might skew towards the class with more data. 
+
+### Create a train/test split
+
+We will use an 80/20 split and set seed to 123. We will also use stratification so that the class imbalance is reserved in both training and testing sets.
+
+```{r}
+set.seed(123)
+genre_split <- initial_split(dtm_df, prop = 0.8, strata = final_genre)
+train_data <- training(genre_split)
+test_data <- testing(genre_split)
 ```
 
