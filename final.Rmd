@@ -77,6 +77,7 @@ Here, we will do some basic text analysis, we will do that in the following orde
 - remove stopwords
 - lemmatize (reduce words to stem. for example, 'playing' would become 'play')
 - TF-IDF (high tf-idf means words that appear a lot in one movide but rarely across others)
+- Document-Term Matrix (DTM) that will transform into a numeric matrix 
 
 Before starting any text operations, I have noticed that some descriptions don't have the full descriptions in the original data and at the end, it would say " See full summary »". And, we also have parantheses in descriptions that would include years (for example, spinoff from a movie name (2018), or a character name with an action name in parantheses). I assumed those weren't super necessary for the model to learn the features. And, there are periods between words such as L.A. or C.I.A, and tokenization might split them, which might not result in a meaningful result. There are also single and double quotation marks around names, which we will also get rid of. Therefore, in the following steps we will remove those by using stringr functions. 
 
@@ -110,13 +111,27 @@ text_movies <- movies_cleaned_descriptions %>%
 lemmatized_movies <- tibble(text_movies) %>%
   mutate(word = lemmatize_words(word)) %>% #now we will lemmatize the words
   count(movie_id, movie_name, word, final_genre, sort = TRUE) %>%
-  bind_tf_idf(movie_name, word, n) %>%
+  bind_tf_idf(movie_id, word, n) %>%
   arrange(desc(tf_idf))
 lemmatized_movies
 ```
 
 
+As a final step before building a model, we coverted the TF-IDF weighted tokens into a Document-Term Matrix using cast_dm(). A DTM represents each movie as a row and each unique word as a column, where values will be TF-IDF we calculated above. As mentioned before, DMF will covert the current one-token-per-row structure to numerical matrix. TF-IDF weighting was used instead of raw word counts so that common words appearing across many movies are already weighted, allowing the model to focus on words that are more distinctive and informative for predicting genre.
 
+```{r document-term matrix, message=FALSE}
+document_term_matrix_movies <- lemmatized_movies %>%
+  cast_dtm(movie_id, word, tf_idf)
+document_term_matrix_movies
+```
+
+Now that we have a summary of DocumentTerm Matrix, we would need the categorical y (the genres) that we want to predict by using the DTM values. Therefore, we will create the outcome labels.
+
+```{r outcomes, message=FALSE}
+genre_labels <- lemmatized_movies %>%
+  distinct(movie_id, final_genre)
+genre_labels
+```
 
 
 

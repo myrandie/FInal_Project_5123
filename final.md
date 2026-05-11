@@ -119,6 +119,7 @@ following order:
   ‘play’)
 - TF-IDF (high tf-idf means words that appear a lot in one movide but
   rarely across others)
+- Document-Term Matrix (DTM) that will transform into a numeric matrix
 
 Before starting any text operations, I have noticed that some
 descriptions don’t have the full descriptions in the original data and
@@ -166,7 +167,7 @@ text_movies <- movies_cleaned_descriptions %>%
 lemmatized_movies <- tibble(text_movies) %>%
   mutate(word = lemmatize_words(word)) %>% #now we will lemmatize the words
   count(movie_id, movie_name, word, final_genre, sort = TRUE) %>%
-  bind_tf_idf(movie_name, word, n) %>%
+  bind_tf_idf(movie_id, word, n) %>%
   arrange(desc(tf_idf))
 lemmatized_movies
 ```
@@ -185,3 +186,50 @@ lemmatized_movies
     ##  9 tt0085789  Kiez                kiez      crime           1     1  10.8   10.8
     ## 10 tt0270224  Bang-bang boomerang duckhunt… animation       1     1  10.8   10.8
     ## # ℹ 2,280,643 more rows
+
+As a final step before building a model, we coverted the TF-IDF weighted
+tokens into a Document-Term Matrix using cast_dm(). A DTM represents
+each movie as a row and each unique word as a column, where values will
+be TF-IDF we calculated above. As mentioned before, DMF will covert the
+current one-token-per-row structure to numerical matrix. TF-IDF
+weighting was used instead of raw word counts so that common words
+appearing across many movies are already weighted, allowing the model to
+focus on words that are more distinctive and informative for predicting
+genre.
+
+``` r
+document_term_matrix_movies <- lemmatized_movies %>%
+  cast_dtm(movie_id, word, tf_idf)
+document_term_matrix_movies
+```
+
+    ## <<DocumentTermMatrix (documents: 181777, terms: 94219)>>
+    ## Non-/sparse entries: 2280653/17124566510
+    ## Sparsity           : 100%
+    ## Maximal term length: 44
+    ## Weighting          : term frequency (tf)
+
+Now that we have a summary of DocumentTerm Matrix, we would need the
+categorical y (the genres) that we want to predict by using the DTM
+values. Therefore, we will create the outcome labels.
+
+``` r
+genre_labels <- lemmatized_movies %>%
+  distinct(movie_id, final_genre)
+genre_labels
+```
+
+    ## # A tibble: 181,777 × 2
+    ##    movie_id   final_genre
+    ##    <chr>      <chr>      
+    ##  1 tt0357912  family     
+    ##  2 tt11690880 adventure  
+    ##  3 tt1207994  horror     
+    ##  4 tt14246472 horror     
+    ##  5 tt2445788  thriller   
+    ##  6 tt3395582  horror     
+    ##  7 tt7472110  war        
+    ##  8 tt0053941  romance    
+    ##  9 tt0085789  crime      
+    ## 10 tt0270224  animation  
+    ## # ℹ 181,767 more rows
