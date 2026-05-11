@@ -124,6 +124,12 @@ document_term_matrix_movies <- lemmatized_movies %>%
   cast_dtm(movie_id, word, tf_idf)
 document_term_matrix_movies
 ```
+We have currently 94219 unique words as columns, which will cause a problem when we convert to dataframe to train data. Therefore, we will remove the words that appear in very few movies.
+```{r}
+dtm_reduced <- removeSparseTerms(document_term_matrix_movies, 0.99)
+dtm_reduced
+```
+We removed terms that are missing from more than 99% of documents. As a result, our novel terms came down to 169.
 
 Now that we have a summary of DocumentTerm Matrix, we would need the categorical y (the genres) that we want to predict by using the DTM values. Therefore, we will create the outcome labels.
 

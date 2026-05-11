@@ -209,6 +209,24 @@ document_term_matrix_movies
     ## Maximal term length: 44
     ## Weighting          : term frequency (tf)
 
+We have currently 94219 unique words as columns, which will cause a
+problem when we convert to dataframe to train data. Therefore, we will
+remove the words that appear in very few movies.
+
+``` r
+dtm_reduced <- removeSparseTerms(document_term_matrix_movies, 0.99)
+dtm_reduced
+```
+
+    ## <<DocumentTermMatrix (documents: 181777, terms: 169)>>
+    ## Non-/sparse entries: 677249/30043064
+    ## Sparsity           : 98%
+    ## Maximal term length: 12
+    ## Weighting          : term frequency (tf)
+
+We removed terms that are missing from more than 99% of documents. As a
+result, our novel terms came down to 169.
+
 Now that we have a summary of DocumentTerm Matrix, we would need the
 categorical y (the genres) that we want to predict by using the DTM
 values. Therefore, we will create the outcome labels.
