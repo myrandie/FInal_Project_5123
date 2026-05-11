@@ -408,3 +408,30 @@ levels(dtm_df$final_genre)
 
 The outcome variable has 16 levels. Therefore, it is a multiclass
 classification problem.
+
+### Examine the class balance
+
+``` r
+table(dtm_df$final_genre)
+```
+
+    ## 
+    ##    action adventure animation biography     crime    family   fantasy film-noir 
+    ##     39469     13036      3917      6062     20208      8744      7160       167 
+    ##   history    horror   mystery   romance     scifi    sports  thriller       war 
+    ##      3734     24463      6165     29136      5261      1893     15413      3265
+
+Now, we will create a bar graph for genres
+
+``` r
+ggplot(dtm_df, aes(x = final_genre, fill = factor(final_genre))) +
+  geom_bar() +
+  theme_minimal() +
+  labs(
+    title = "Bar Graphs for Different Genres",
+    ylab = "Count",
+    fill = "Genres of movies"
+  )
+```
+
+![](final_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
