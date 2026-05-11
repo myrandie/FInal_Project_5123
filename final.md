@@ -6,6 +6,9 @@ miranda_moe
 - [Packages](#packages)
 - [Data Frames](#data-frames)
 - [Text cleaning](#text-cleaning)
+- [Prepping Data Frames to build classification
+  model](#prepping-data-frames-to-build-classification-model)
+- [Building Classification Model](#building-classification-model)
 
 In this project, we will if we can build a classification model to learn
 features of model descriptions to predict genre it represents. We will
@@ -234,20 +237,143 @@ values. Therefore, we will create the outcome labels.
 ``` r
 genre_labels <- lemmatized_movies %>%
   distinct(movie_id, final_genre)
-genre_labels
+head(genre_labels)
 ```
 
-    ## # A tibble: 181,777 × 2
-    ##    movie_id   final_genre
-    ##    <chr>      <chr>      
-    ##  1 tt0357912  family     
-    ##  2 tt11690880 adventure  
-    ##  3 tt1207994  horror     
-    ##  4 tt14246472 horror     
-    ##  5 tt2445788  thriller   
-    ##  6 tt3395582  horror     
-    ##  7 tt7472110  war        
-    ##  8 tt0053941  romance    
-    ##  9 tt0085789  crime      
-    ## 10 tt0270224  animation  
-    ## # ℹ 181,767 more rows
+    ## # A tibble: 6 × 2
+    ##   movie_id   final_genre
+    ##   <chr>      <chr>      
+    ## 1 tt0357912  family     
+    ## 2 tt11690880 adventure  
+    ## 3 tt1207994  horror     
+    ## 4 tt14246472 horror     
+    ## 5 tt2445788  thriller   
+    ## 6 tt3395582  horror
+
+## Prepping Data Frames to build classification model
+
+We would first need the dtm_reduce to be in a dataframe where we can
+join the outcome categories (labels).
+
+``` r
+dtm_df <- as.data.frame(as.matrix(dtm_reduced))
+head(dtm_df, 2)
+```
+
+    ##            play island horror hope black bad land soldier hes accident game cop
+    ## tt0357912     0      0      0    0     0   0    0       0   0        0    0   0
+    ## tt11690880    0      0      0    0     0   0    0       0   0        0    0   0
+    ##            deal middle spend future win serial real comedy attack hunt boy hire
+    ## tt0357912     0      0     0      0   0      0    0      0      0    0   0    0
+    ## tt11690880    0      0     0      0   0      0    0      0      0    0   0    0
+    ##            die power trip mission marriage village army drug rich tale car
+    ## tt0357912    0     0    0       0        0       0    0    0    0    0   0
+    ## tt11690880   0     0    0       0        0       0    0    0    0    0   0
+    ##            lover call catch prison head age miss dream century dead human
+    ## tt0357912      0    0     0      0    0   0    0     0       0    0     0
+    ## tt11690880     0    0     0      0    0   0    0     0       0    0     0
+    ##            change parent hide action country haunt money dangerous street
+    ## tt0357912       0      0    0      0       0     0     0         0      0
+    ## tt11690880      0      0    0      0       0     0     0         0      0
+    ##            college detective deadly york stop battle officer drama visit kidnap
+    ## tt0357912        0         0      0    0    0      0       0     0     0      0
+    ## tt11690880       0         0      0    0    0      0       0     0     0      0
+    ##            child job star sister series adventure female arrive seek gang name
+    ## tt0357912      0   0    0      0      0         0      0      0    0    0    0
+    ## tt11690880     0   0    0      0      0         0      0      0    0    0    0
+    ##            husband thriller trouble move agent attempt learn revenge movie
+    ## tt0357912        0        0       0    0     0       0     0       0     0
+    ## tt11690880       0        0       0    0     0       0     0       0     0
+    ##            couple criminal student tell journey break evil wealthy team girl
+    ## tt0357912       0        0       0    0       0     0    0       0    0    0
+    ## tt11690880      0        0       0    0       0     0    0       0    0    0
+    ##            beautiful night join relationship survive crime local event american
+    ## tt0357912          0     0    0            0       0     0     0     0        0
+    ## tt11690880         0     0    0            0       0     0     0     0        0
+    ##            girlfriend brother house involve find school plan investigate police
+    ## tt0357912           0       0     0       0    0      0    0           0      0
+    ## tt11690880          0       0     0       0    0      0    0           0      0
+    ##            lead run strange steal day true mother past dark fight people son
+    ## tt0357912     0   0       0     0   0    0      0    0    0     0      0   0
+    ## tt11690880    0   0       0     0   0    0      0    0    0     0      0   0
+    ##            secret start lose save travel killer kill bring daughter return city
+    ## tt0357912       0     0    0    0      0      0    0     0        0      0    0
+    ## tt11690880      0     0    0    0      0      0    0     0        0      0    0
+    ##            search marry plot film town war meet struggle escape leave time base
+    ## tt0357912       0     0    0    0    0   0    0        0      0     0    0    0
+    ## tt11690880      0     0    0    0    0   0    0        0      0     0    0    0
+    ##            live home take death wife set discover begin force story decide
+    ## tt0357912     0    0    0     0    0   0        0     0     0     0      0
+    ## tt11690880    0    0    0     0    0   0        0     0     0     0      0
+    ##            mysterious woman world fall friend father family murder love life
+    ## tt0357912           0     0     0    0      0      0      0      0    0    0
+    ## tt11690880          0     0     0    0      0      0      0      0    0    0
+
+As we can see above, movie ids are not a column and they appear as row
+names. We will first convert them to column called movie_id before we
+join the labels.
+
+``` r
+dtm_df$movie_id <- rownames(dtm_df)
+head(dtm_df$movie_id)
+```
+
+    ## [1] "tt0357912"  "tt11690880" "tt1207994"  "tt14246472" "tt2445788" 
+    ## [6] "tt3395582"
+
+``` r
+dtm_df <- dtm_df %>%
+  left_join(genre_labels, by = "movie_id")
+head(dtm_df, 2)
+```
+
+    ##   play island horror hope black bad land soldier hes accident game cop deal
+    ## 1    0      0      0    0     0   0    0       0   0        0    0   0    0
+    ## 2    0      0      0    0     0   0    0       0   0        0    0   0    0
+    ##   middle spend future win serial real comedy attack hunt boy hire die power
+    ## 1      0     0      0   0      0    0      0      0    0   0    0   0     0
+    ## 2      0     0      0   0      0    0      0      0    0   0    0   0     0
+    ##   trip mission marriage village army drug rich tale car lover call catch prison
+    ## 1    0       0        0       0    0    0    0    0   0     0    0     0      0
+    ## 2    0       0        0       0    0    0    0    0   0     0    0     0      0
+    ##   head age miss dream century dead human change parent hide action country
+    ## 1    0   0    0     0       0    0     0      0      0    0      0       0
+    ## 2    0   0    0     0       0    0     0      0      0    0      0       0
+    ##   haunt money dangerous street college detective deadly york stop battle
+    ## 1     0     0         0      0       0         0      0    0    0      0
+    ## 2     0     0         0      0       0         0      0    0    0      0
+    ##   officer drama visit kidnap child job star sister series adventure female
+    ## 1       0     0     0      0     0   0    0      0      0         0      0
+    ## 2       0     0     0      0     0   0    0      0      0         0      0
+    ##   arrive seek gang name husband thriller trouble move agent attempt learn
+    ## 1      0    0    0    0       0        0       0    0     0       0     0
+    ## 2      0    0    0    0       0        0       0    0     0       0     0
+    ##   revenge movie couple criminal student tell journey break evil wealthy team
+    ## 1       0     0      0        0       0    0       0     0    0       0    0
+    ## 2       0     0      0        0       0    0       0     0    0       0    0
+    ##   girl beautiful night join relationship survive crime local event american
+    ## 1    0         0     0    0            0       0     0     0     0        0
+    ## 2    0         0     0    0            0       0     0     0     0        0
+    ##   girlfriend brother house involve find school plan investigate police lead run
+    ## 1          0       0     0       0    0      0    0           0      0    0   0
+    ## 2          0       0     0       0    0      0    0           0      0    0   0
+    ##   strange steal day true mother past dark fight people son secret start lose
+    ## 1       0     0   0    0      0    0    0     0      0   0      0     0    0
+    ## 2       0     0   0    0      0    0    0     0      0   0      0     0    0
+    ##   save travel killer kill bring daughter return city search marry plot film
+    ## 1    0      0      0    0     0        0      0    0      0     0    0    0
+    ## 2    0      0      0    0     0        0      0    0      0     0    0    0
+    ##   town war meet struggle escape leave time base live home take death wife set
+    ## 1    0   0    0        0      0     0    0    0    0    0    0     0    0   0
+    ## 2    0   0    0        0      0     0    0    0    0    0    0     0    0   0
+    ##   discover begin force story decide mysterious woman world fall friend father
+    ## 1        0     0     0     0      0          0     0     0    0      0      0
+    ## 2        0     0     0     0      0          0     0     0    0      0      0
+    ##   family murder love life   movie_id final_genre
+    ## 1      0      0    0    0  tt0357912      family
+    ## 2      0      0    0    0 tt11690880   adventure
+
+Now that we’ve prepared the dataframe, we will proceed with building the
+model.
+
+## Building Classification Model

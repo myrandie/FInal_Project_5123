@@ -136,10 +136,32 @@ Now that we have a summary of DocumentTerm Matrix, we would need the categorical
 ```{r outcomes, message=FALSE}
 genre_labels <- lemmatized_movies %>%
   distinct(movie_id, final_genre)
-genre_labels
+head(genre_labels)
 ```
 
 
+## Prepping Data Frames to build classification model
 
+We would first need the dtm_reduce to be in a dataframe where we can join the outcome categories (labels). 
+
+```{r dataframe, message=FALSE}
+dtm_df <- as.data.frame(as.matrix(dtm_reduced))
+head(dtm_df, 2)
+```
+
+As we can see above, movie ids are not a column and they appear as row names. We will first convert them to column called movie_id before we join the labels.
+
+```{r join with labels, message=FALSE}
+dtm_df$movie_id <- rownames(dtm_df)
+head(dtm_df$movie_id)
+
+dtm_df <- dtm_df %>%
+  left_join(genre_labels, by = "movie_id")
+head(dtm_df, 2)
+```
+
+Now that we've prepared the dataframe, we will proceed with building the model. 
+
+## Building Classification Model
 
 
