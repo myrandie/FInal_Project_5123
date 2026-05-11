@@ -48,10 +48,16 @@ From raw data exploration, I have noticed that some movies have multiple genre l
 To combine all 16 CSVs into a single dataframe, I used lapply() to loop through each file. For each file, I extracted the genre label from the filename by removing the .csv extension using gsub(), filtered rows using str_detect() to keep only movies matching that genre, added a new column final_genre to store the label, and selected only the relevant columns (movie_id, movie_name, description, final_genre). All the movies are now binded into one dataframe. 
 
 ```{r bind dataframes, message=FALSE}
+# In scifi.csv, the genres are listed as "Sci-Fi". In sports.csv, they are listed as "Sport". so we would need to map that. 
+genre_map <- c(
+  "scifi" = "sci-fi",
+  "sports" = "sport"
+)
 movies_list <- lapply(file_list, function(f) {
   genre_name <- gsub(".csv", "", f)
+  search_term <- ifelse(genre_name %in% names(genre_map), genre_map[genre_name], genre_name)
   df <- read_csv(f) |>
-    filter(str_detect(str_to_lower(genre), genre_name)) |>
+    filter(str_detect(str_to_lower(genre), search_term)) |>
     mutate(final_genre = genre_name) |>
     select(movie_id, movie_name, description, final_genre)
   df
@@ -124,12 +130,12 @@ document_term_matrix_movies <- lemmatized_movies %>%
   cast_dtm(movie_id, word, tf_idf)
 document_term_matrix_movies
 ```
-We have currently 94219 unique words as columns, which will cause a problem when we convert to dataframe to train data. Therefore, we will remove the words that appear in very few movies.
+We have currently 96045 unique words as columns, which will cause a problem when we convert to dataframe to train data. Therefore, we will remove the words that appear in very few movies.
 ```{r}
 dtm_reduced <- removeSparseTerms(document_term_matrix_movies, 0.99)
 dtm_reduced
 ```
-We removed terms that are missing from more than 99% of documents. As a result, our novel terms came down to 169.
+We removed terms that are missing from more than 99% of documents. As a result, our novel terms came down to 171.
 
 Now that we have a summary of DocumentTerm Matrix, we would need the categorical y (the genres) that we want to predict by using the DTM values. Therefore, we will create the outcome labels.
 
@@ -163,5 +169,13 @@ head(dtm_df, 2)
 Now that we've prepared the dataframe, we will proceed with building the model. 
 
 ## Building Classification Model
+
+First, we will change the outcome variable into a factor
+
+```{r factor, message=FALSE}
+str(dtm_df$final_genre)
+dtm_df$final_genre <- factor(dtm_df$final_genre)
+levels(dtm_df$final_genre)
+```
 
 

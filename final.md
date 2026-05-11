@@ -72,10 +72,16 @@ columns (movie_id, movie_name, description, final_genre). All the movies
 are now binded into one dataframe.
 
 ``` r
+# In scifi.csv, the genres are listed as "Sci-Fi". In sports.csv, they are listed as "Sport". so we would need to map that. 
+genre_map <- c(
+  "scifi" = "sci-fi",
+  "sports" = "sport"
+)
 movies_list <- lapply(file_list, function(f) {
   genre_name <- gsub(".csv", "", f)
+  search_term <- ifelse(genre_name %in% names(genre_map), genre_map[genre_name], genre_name)
   df <- read_csv(f) |>
-    filter(str_detect(str_to_lower(genre), genre_name)) |>
+    filter(str_detect(str_to_lower(genre), search_term)) |>
     mutate(final_genre = genre_name) |>
     select(movie_id, movie_name, description, final_genre)
   df
@@ -175,7 +181,7 @@ lemmatized_movies <- tibble(text_movies) %>%
 lemmatized_movies
 ```
 
-    ## # A tibble: 2,280,653 × 8
+    ## # A tibble: 2,359,116 × 8
     ##    movie_id   movie_name          word      final_genre     n    tf   idf tf_idf
     ##    <chr>      <chr>               <chr>     <chr>       <int> <dbl> <dbl>  <dbl>
     ##  1 tt0357912  Mohar               kxdhjdix… family          1     1  11.5   11.5
@@ -188,7 +194,7 @@ lemmatized_movies
     ##  8 tt0053941  The White Horse Inn rössl     romance         1     1  10.8   10.8
     ##  9 tt0085789  Kiez                kiez      crime           1     1  10.8   10.8
     ## 10 tt0270224  Bang-bang boomerang duckhunt… animation       1     1  10.8   10.8
-    ## # ℹ 2,280,643 more rows
+    ## # ℹ 2,359,106 more rows
 
 As a final step before building a model, we coverted the TF-IDF weighted
 tokens into a Document-Term Matrix using cast_dm(). A DTM represents
@@ -206,13 +212,13 @@ document_term_matrix_movies <- lemmatized_movies %>%
 document_term_matrix_movies
 ```
 
-    ## <<DocumentTermMatrix (documents: 181777, terms: 94219)>>
-    ## Non-/sparse entries: 2280653/17124566510
+    ## <<DocumentTermMatrix (documents: 188093, terms: 96045)>>
+    ## Non-/sparse entries: 2359116/18063033069
     ## Sparsity           : 100%
     ## Maximal term length: 44
     ## Weighting          : term frequency (tf)
 
-We have currently 94219 unique words as columns, which will cause a
+We have currently 96045 unique words as columns, which will cause a
 problem when we convert to dataframe to train data. Therefore, we will
 remove the words that appear in very few movies.
 
@@ -221,14 +227,14 @@ dtm_reduced <- removeSparseTerms(document_term_matrix_movies, 0.99)
 dtm_reduced
 ```
 
-    ## <<DocumentTermMatrix (documents: 181777, terms: 169)>>
-    ## Non-/sparse entries: 677249/30043064
+    ## <<DocumentTermMatrix (documents: 188093, terms: 171)>>
+    ## Non-/sparse entries: 701341/31462562
     ## Sparsity           : 98%
     ## Maximal term length: 12
     ## Weighting          : term frequency (tf)
 
 We removed terms that are missing from more than 99% of documents. As a
-result, our novel terms came down to 169.
+result, our novel terms came down to 171.
 
 Now that we have a summary of DocumentTerm Matrix, we would need the
 categorical y (the genres) that we want to predict by using the DTM
@@ -260,54 +266,57 @@ dtm_df <- as.data.frame(as.matrix(dtm_reduced))
 head(dtm_df, 2)
 ```
 
-    ##            play island horror hope black bad land soldier hes accident game cop
-    ## tt0357912     0      0      0    0     0   0    0       0   0        0    0   0
-    ## tt11690880    0      0      0    0     0   0    0       0   0        0    0   0
-    ##            deal middle spend future win serial real comedy attack hunt boy hire
-    ## tt0357912     0      0     0      0   0      0    0      0      0    0   0    0
-    ## tt11690880    0      0     0      0   0      0    0      0      0    0   0    0
-    ##            die power trip mission marriage village army drug rich tale car
-    ## tt0357912    0     0    0       0        0       0    0    0    0    0   0
-    ## tt11690880   0     0    0       0        0       0    0    0    0    0   0
-    ##            lover call catch prison head age miss dream century dead human
-    ## tt0357912      0    0     0      0    0   0    0     0       0    0     0
-    ## tt11690880     0    0     0      0    0   0    0     0       0    0     0
-    ##            change parent hide action country haunt money dangerous street
-    ## tt0357912       0      0    0      0       0     0     0         0      0
-    ## tt11690880      0      0    0      0       0     0     0         0      0
-    ##            college detective deadly york stop battle officer drama visit kidnap
-    ## tt0357912        0         0      0    0    0      0       0     0     0      0
-    ## tt11690880       0         0      0    0    0      0       0     0     0      0
-    ##            child job star sister series adventure female arrive seek gang name
-    ## tt0357912      0   0    0      0      0         0      0      0    0    0    0
-    ## tt11690880     0   0    0      0      0         0      0      0    0    0    0
-    ##            husband thriller trouble move agent attempt learn revenge movie
-    ## tt0357912        0        0       0    0     0       0     0       0     0
-    ## tt11690880       0        0       0    0     0       0     0       0     0
-    ##            couple criminal student tell journey break evil wealthy team girl
-    ## tt0357912       0        0       0    0       0     0    0       0    0    0
-    ## tt11690880      0        0       0    0       0     0    0       0    0    0
-    ##            beautiful night join relationship survive crime local event american
-    ## tt0357912          0     0    0            0       0     0     0     0        0
-    ## tt11690880         0     0    0            0       0     0     0     0        0
-    ##            girlfriend brother house involve find school plan investigate police
-    ## tt0357912           0       0     0       0    0      0    0           0      0
-    ## tt11690880          0       0     0       0    0      0    0           0      0
-    ##            lead run strange steal day true mother past dark fight people son
-    ## tt0357912     0   0       0     0   0    0      0    0    0     0      0   0
-    ## tt11690880    0   0       0     0   0    0      0    0    0     0      0   0
-    ##            secret start lose save travel killer kill bring daughter return city
-    ## tt0357912       0     0    0    0      0      0    0     0        0      0    0
-    ## tt11690880      0     0    0    0      0      0    0     0        0      0    0
-    ##            search marry plot film town war meet struggle escape leave time base
-    ## tt0357912       0     0    0    0    0   0    0        0      0     0    0    0
-    ## tt11690880      0     0    0    0    0   0    0        0      0     0    0    0
-    ##            live home take death wife set discover begin force story decide
-    ## tt0357912     0    0    0     0    0   0        0     0     0     0      0
-    ## tt11690880    0    0    0     0    0   0        0     0     0     0      0
-    ##            mysterious woman world fall friend father family murder love life
-    ## tt0357912           0     0     0    0      0      0      0      0    0    0
-    ## tt11690880          0     0     0    0      0      0      0      0    0    0
+    ##            game play island horror black hope bad land soldier hes cop accident
+    ## tt0357912     0    0      0      0     0    0   0    0       0   0   0        0
+    ## tt11690880    0    0      0      0     0    0   0    0       0   0   0        0
+    ##            deal middle spend serial attack real hunt comedy boy hire street die
+    ## tt0357912     0      0     0      0      0    0    0      0   0    0      0   0
+    ## tt11690880    0      0     0      0      0    0    0      0   0    0      0   0
+    ##            win trip marriage village army car power drug rich tale mission
+    ## tt0357912    0    0        0       0    0   0     0    0    0    0       0
+    ## tt11690880   0    0        0       0    0   0     0    0    0    0       0
+    ##            lover catch earth call prison future head miss age dead parent
+    ## tt0357912      0     0     0    0      0      0    0    0   0    0      0
+    ## tt11690880     0     0     0    0      0      0    0    0   0    0      0
+    ##            century dream hide action haunt change country money detective
+    ## tt0357912        0     0    0      0     0      0       0     0         0
+    ## tt11690880       0     0    0      0     0      0       0     0         0
+    ##            dangerous officer college york human deadly encounter kidnap stop
+    ## tt0357912          0       0       0    0     0      0         0      0    0
+    ## tt11690880         0       0       0    0     0      0         0      0    0
+    ##            battle visit child drama job sister adventure gang series seek
+    ## tt0357912       0     0     0     0   0      0         0    0      0    0
+    ## tt11690880      0     0     0     0   0      0         0    0      0    0
+    ##            female husband team star arrive name thriller revenge agent move
+    ## tt0357912       0       0    0    0      0    0        0       0     0    0
+    ## tt11690880      0       0    0    0      0    0        0       0     0    0
+    ##            trouble movie attempt learn couple criminal student wealthy tell
+    ## tt0357912        0     0       0     0      0        0       0       0    0
+    ## tt11690880       0     0       0     0      0        0       0       0    0
+    ##            evil beautiful break girl night relationship crime journey join
+    ## tt0357912     0         0     0    0     0            0     0       0    0
+    ## tt11690880    0         0     0    0     0            0     0       0    0
+    ##            local american survive event girlfriend brother house involve find
+    ## tt0357912      0        0       0     0          0       0     0       0    0
+    ## tt11690880     0        0       0     0          0       0     0       0    0
+    ##            plan investigate police school lead run steal true strange mother
+    ## tt0357912     0           0      0      0    0   0     0    0       0      0
+    ## tt11690880    0           0      0      0    0   0     0    0       0      0
+    ##            day dark past fight people son secret start killer lose kill save
+    ## tt0357912    0    0    0     0      0   0      0     0      0    0    0    0
+    ## tt11690880   0    0    0     0      0   0      0     0      0    0    0    0
+    ##            daughter travel bring marry return city search film town plot war
+    ## tt0357912         0      0     0     0      0    0      0    0    0    0   0
+    ## tt11690880        0      0     0     0      0    0      0    0    0    0   0
+    ##            meet escape struggle leave home time base live wife death take set
+    ## tt0357912     0      0        0     0    0    0    0    0    0     0    0   0
+    ## tt11690880    0      0        0     0    0    0    0    0    0     0    0   0
+    ##            decide discover begin force story woman mysterious fall world friend
+    ## tt0357912       0        0     0     0     0     0          0    0     0      0
+    ## tt11690880      0        0     0     0     0     0          0    0     0      0
+    ##            father family murder love life
+    ## tt0357912       0      0      0    0    0
+    ## tt11690880      0      0      0    0    0
 
 As we can see above, movie ids are not a column and they appear as row
 names. We will first convert them to column called movie_id before we
@@ -327,53 +336,70 @@ dtm_df <- dtm_df %>%
 head(dtm_df, 2)
 ```
 
-    ##   play island horror hope black bad land soldier hes accident game cop deal
-    ## 1    0      0      0    0     0   0    0       0   0        0    0   0    0
-    ## 2    0      0      0    0     0   0    0       0   0        0    0   0    0
-    ##   middle spend future win serial real comedy attack hunt boy hire die power
-    ## 1      0     0      0   0      0    0      0      0    0   0    0   0     0
-    ## 2      0     0      0   0      0    0      0      0    0   0    0   0     0
-    ##   trip mission marriage village army drug rich tale car lover call catch prison
-    ## 1    0       0        0       0    0    0    0    0   0     0    0     0      0
-    ## 2    0       0        0       0    0    0    0    0   0     0    0     0      0
-    ##   head age miss dream century dead human change parent hide action country
-    ## 1    0   0    0     0       0    0     0      0      0    0      0       0
-    ## 2    0   0    0     0       0    0     0      0      0    0      0       0
-    ##   haunt money dangerous street college detective deadly york stop battle
-    ## 1     0     0         0      0       0         0      0    0    0      0
-    ## 2     0     0         0      0       0         0      0    0    0      0
-    ##   officer drama visit kidnap child job star sister series adventure female
-    ## 1       0     0     0      0     0   0    0      0      0         0      0
-    ## 2       0     0     0      0     0   0    0      0      0         0      0
-    ##   arrive seek gang name husband thriller trouble move agent attempt learn
-    ## 1      0    0    0    0       0        0       0    0     0       0     0
-    ## 2      0    0    0    0       0        0       0    0     0       0     0
-    ##   revenge movie couple criminal student tell journey break evil wealthy team
-    ## 1       0     0      0        0       0    0       0     0    0       0    0
-    ## 2       0     0      0        0       0    0       0     0    0       0    0
-    ##   girl beautiful night join relationship survive crime local event american
-    ## 1    0         0     0    0            0       0     0     0     0        0
-    ## 2    0         0     0    0            0       0     0     0     0        0
-    ##   girlfriend brother house involve find school plan investigate police lead run
-    ## 1          0       0     0       0    0      0    0           0      0    0   0
-    ## 2          0       0     0       0    0      0    0           0      0    0   0
-    ##   strange steal day true mother past dark fight people son secret start lose
-    ## 1       0     0   0    0      0    0    0     0      0   0      0     0    0
-    ## 2       0     0   0    0      0    0    0     0      0   0      0     0    0
-    ##   save travel killer kill bring daughter return city search marry plot film
-    ## 1    0      0      0    0     0        0      0    0      0     0    0    0
-    ## 2    0      0      0    0     0        0      0    0      0     0    0    0
-    ##   town war meet struggle escape leave time base live home take death wife set
-    ## 1    0   0    0        0      0     0    0    0    0    0    0     0    0   0
-    ## 2    0   0    0        0      0     0    0    0    0    0    0     0    0   0
-    ##   discover begin force story decide mysterious woman world fall friend father
-    ## 1        0     0     0     0      0          0     0     0    0      0      0
-    ## 2        0     0     0     0      0          0     0     0    0      0      0
-    ##   family murder love life   movie_id final_genre
-    ## 1      0      0    0    0  tt0357912      family
-    ## 2      0      0    0    0 tt11690880   adventure
+    ##   game play island horror black hope bad land soldier hes cop accident deal
+    ## 1    0    0      0      0     0    0   0    0       0   0   0        0    0
+    ## 2    0    0      0      0     0    0   0    0       0   0   0        0    0
+    ##   middle spend serial attack real hunt comedy boy hire street die win trip
+    ## 1      0     0      0      0    0    0      0   0    0      0   0   0    0
+    ## 2      0     0      0      0    0    0      0   0    0      0   0   0    0
+    ##   marriage village army car power drug rich tale mission lover catch earth call
+    ## 1        0       0    0   0     0    0    0    0       0     0     0     0    0
+    ## 2        0       0    0   0     0    0    0    0       0     0     0     0    0
+    ##   prison future head miss age dead parent century dream hide action haunt
+    ## 1      0      0    0    0   0    0      0       0     0    0      0     0
+    ## 2      0      0    0    0   0    0      0       0     0    0      0     0
+    ##   change country money detective dangerous officer college york human deadly
+    ## 1      0       0     0         0         0       0       0    0     0      0
+    ## 2      0       0     0         0         0       0       0    0     0      0
+    ##   encounter kidnap stop battle visit child drama job sister adventure gang
+    ## 1         0      0    0      0     0     0     0   0      0         0    0
+    ## 2         0      0    0      0     0     0     0   0      0         0    0
+    ##   series seek female husband team star arrive name thriller revenge agent move
+    ## 1      0    0      0       0    0    0      0    0        0       0     0    0
+    ## 2      0    0      0       0    0    0      0    0        0       0     0    0
+    ##   trouble movie attempt learn couple criminal student wealthy tell evil
+    ## 1       0     0       0     0      0        0       0       0    0    0
+    ## 2       0     0       0     0      0        0       0       0    0    0
+    ##   beautiful break girl night relationship crime journey join local american
+    ## 1         0     0    0     0            0     0       0    0     0        0
+    ## 2         0     0    0     0            0     0       0    0     0        0
+    ##   survive event girlfriend brother house involve find plan investigate police
+    ## 1       0     0          0       0     0       0    0    0           0      0
+    ## 2       0     0          0       0     0       0    0    0           0      0
+    ##   school lead run steal true strange mother day dark past fight people son
+    ## 1      0    0   0     0    0       0      0   0    0    0     0      0   0
+    ## 2      0    0   0     0    0       0      0   0    0    0     0      0   0
+    ##   secret start killer lose kill save daughter travel bring marry return city
+    ## 1      0     0      0    0    0    0        0      0     0     0      0    0
+    ## 2      0     0      0    0    0    0        0      0     0     0      0    0
+    ##   search film town plot war meet escape struggle leave home time base live wife
+    ## 1      0    0    0    0   0    0      0        0     0    0    0    0    0    0
+    ## 2      0    0    0    0   0    0      0        0     0    0    0    0    0    0
+    ##   death take set decide discover begin force story woman mysterious fall world
+    ## 1     0    0   0      0        0     0     0     0     0          0    0     0
+    ## 2     0    0   0      0        0     0     0     0     0          0    0     0
+    ##   friend father family murder love life   movie_id final_genre
+    ## 1      0      0      0      0    0    0  tt0357912      family
+    ## 2      0      0      0      0    0    0 tt11690880   adventure
 
 Now that we’ve prepared the dataframe, we will proceed with building the
 model.
 
 ## Building Classification Model
+
+First, we will change the outcome variable into a factor
+
+``` r
+str(dtm_df$final_genre)
+```
+
+    ##  chr [1:188093] "family" "adventure" "horror" "horror" "thriller" "horror" ...
+
+``` r
+dtm_df$final_genre <- factor(dtm_df$final_genre)
+levels(dtm_df$final_genre)
+```
+
+    ##  [1] "action"    "adventure" "animation" "biography" "crime"     "family"   
+    ##  [7] "fantasy"   "film-noir" "history"   "horror"    "mystery"   "romance"  
+    ## [13] "scifi"     "sports"    "thriller"  "war"
