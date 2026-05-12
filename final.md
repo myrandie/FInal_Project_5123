@@ -478,8 +478,10 @@ nb_model <- naive_Bayes() %>%
 
 ### Create a recipe
 
-There are so many columns that have 0, so we will filter them out by
-creating a recipe
+We’re creating a recipe before building a workflow. There are so many
+columns that have 0, and thosecolumns that contain the same value across
+all movies and offer no predictive power. Through update_role(), we are
+keeping movie_id in our data frame but not using it our data training.
 
 ``` r
 nb_recipe <- recipe(final_genre ~ ., data = train_data) %>%
@@ -510,4 +512,81 @@ nb_fit <- fit(nb_workflow, data = train_data)
 nb_preds <- predict(nb_fit, test_data, type = "prob") %>%
   bind_cols(predict(nb_fit, test_data)) %>%
   bind_cols(test_data %>% dplyr::select(movie_id, final_genre))
+head(nb_preds, 2)
 ```
+
+    ## # A tibble: 2 × 19
+    ##   .pred_action .pred_adventure .pred_animation .pred_biography .pred_crime
+    ##          <dbl>           <dbl>           <dbl>           <dbl>       <dbl>
+    ## 1  0.000000562        4.83e-18        1.19e-25        2.08e-10    4.09e-14
+    ## 2  0.000000562        4.83e-18        1.19e-25        2.08e-10    4.09e-14
+    ## # ℹ 14 more variables: .pred_family <dbl>, .pred_fantasy <dbl>,
+    ## #   `.pred_film-noir` <dbl>, .pred_history <dbl>, .pred_horror <dbl>,
+    ## #   .pred_mystery <dbl>, .pred_romance <dbl>, .pred_scifi <dbl>,
+    ## #   .pred_sports <dbl>, .pred_thriller <dbl>, .pred_war <dbl>,
+    ## #   .pred_class <fct>, movie_id <chr>, final_genre <fct>
+
+From the results above, we can see the probabilty of our model assigning
+to the actual genre is very small. Just from eyeballing the data, the
+model has a very strong bias towards the genre “Romance” since the model
+seems to be guessing most movies as romance.
+
+### Model Evaluation
+
+We will evaluate the model by using a confusion matrix
+
+``` r
+nb_preds %>% 
+  conf_mat(truth = final_genre, estimate = .pred_class)
+```
+
+    ##            Truth
+    ## Prediction  action adventure animation biography crime family fantasy film-noir
+    ##   action       195        17         7         3   107      1      13         1
+    ##   adventure      0         0         0         0     0      0       0         0
+    ##   animation      0         0         0         0     0      0       0         0
+    ##   biography      1         0         0         1     1      0       0         0
+    ##   crime          1         0         0         0     0      0       0         0
+    ##   family         0         0         0         0     0      0       0         0
+    ##   fantasy        0         0         0         0     0      0       0         0
+    ##   film-noir      0         0         0         0     0      0       0         0
+    ##   history        0         0         0         0     0      0       0         0
+    ##   horror         1         1         0         0     3      0       0         0
+    ##   mystery        0         0         0         0     0      0       0         0
+    ##   romance     7753      2486       765      1218  3924   1735    1381        28
+    ##   scifi          0         0         0         0     0      0       0         0
+    ##   sports         0         0         0         0     0      0       0         0
+    ##   thriller       0         0         0         0     0      0       0         0
+    ##   war            0         0         0         0     0      0       0         0
+    ##            Truth
+    ## Prediction  history horror mystery romance scifi sports thriller  war
+    ##   action          5     60      13       3     6      3       62    5
+    ##   adventure       0      0       0       0     0      0        0    0
+    ##   animation       0      0       0       0     0      0        0    0
+    ##   biography       0      0       0       4     0      0        1    0
+    ##   crime           0      0       0       0     0      0        0    0
+    ##   family          0      0       0       0     0      0        0    0
+    ##   fantasy         0      0       0       0     0      0        0    0
+    ##   film-noir       0      0       0       0     0      0        0    0
+    ##   history         0      0       0       0     0      0        0    0
+    ##   horror          0      5       1       0     0      1        1    0
+    ##   mystery         0      0       0       0     0      0        0    0
+    ##   romance       759   4865    1273    5839  1034    378     3009  650
+    ##   scifi           0      0       0       0     0      0        0    0
+    ##   sports          0      0       0       0     0      0        0    0
+    ##   thriller        0      0       0       0     0      0        0    0
+    ##   war             0      0       0       0     0      0        0    0
+
+We will also create a heatmap
+
+``` r
+nb_preds %>% 
+  conf_mat(truth = final_genre, estimate = .pred_class) %>% 
+  autoplot(type = "heatmap") +
+  scale_fill_gradient(low = "white", high = "midnightblue") 
+```
+
+    ## Scale for fill is already present.
+    ## Adding another scale for fill, which will replace the existing scale.
+
+![](final_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->

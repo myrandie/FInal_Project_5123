@@ -260,5 +260,26 @@ nb_fit <- fit(nb_workflow, data = train_data)
 nb_preds <- predict(nb_fit, test_data, type = "prob") %>%
   bind_cols(predict(nb_fit, test_data)) %>%
   bind_cols(test_data %>% dplyr::select(movie_id, final_genre))
+head(nb_preds, 2)
+```
+
+From the results above, we can see the probabilty of our model assigning to the actual genre is very small. Just from eyeballing the data, the model has a very strong bias towards the genre "Romance" since the model seems to be guessing most movies as romance. 
+
+### Model Evaluation
+
+We will evaluate the model by using a confusion matrix
+
+```{r}
+nb_preds %>% 
+  conf_mat(truth = final_genre, estimate = .pred_class)
+```
+
+We will also create a heatmap
+
+```{r}
+nb_preds %>% 
+  conf_mat(truth = final_genre, estimate = .pred_class) %>% 
+  autoplot(type = "heatmap") +
+  scale_fill_gradient(low = "white", high = "midnightblue") 
 ```
 
