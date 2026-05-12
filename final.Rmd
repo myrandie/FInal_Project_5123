@@ -283,6 +283,9 @@ nb_preds %>%
   autoplot(type = "heatmap") +
   scale_fill_gradient(low = "white", high = "midnightblue") 
 ```
+
+
+
 ## Results
 
 ## Limitations

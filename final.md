@@ -9,6 +9,7 @@ miranda_moe
 - [Prepping Data Frames to build classification
   model](#prepping-data-frames-to-build-classification-model)
 - [Building Classification Model](#building-classification-model)
+- [Results](#results)
 - [Limitations](#limitations)
 
 In this project, we will if we can build a classification model to learn
@@ -588,6 +589,8 @@ nb_preds %>%
     ## Scale for fill is already present.
     ## Adding another scale for fill, which will replace the existing scale.
 
-![](final_files/figure-gfm/unnamed-chunk-14-1.png)<!-- --> \## Results
+![](final_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+
+## Results
 
 ## Limitations
