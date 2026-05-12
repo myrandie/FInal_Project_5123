@@ -11,6 +11,7 @@ miranda_moe
 - [Building Classification Model](#building-classification-model)
 - [Results](#results)
 - [Limitations](#limitations)
+- [AI Acknowledgement](#ai-acknowledgement)
 
 In this project, we will if we can build a classification model to learn
 features of model descriptions to predict genre it represents. We will
@@ -593,4 +594,27 @@ nb_preds %>%
 
 ## Results
 
+The Naive Bayes model achieved a low overall accuracy, as seen in the
+confusion matrix. Even though the model successfully identified nearly
+all Romance movies (5,839 correct), it indicated a majority class bias.
+Thus, it incorrectly classified the vast majority of other genres, such
+as Action, Adventure, and Thriller, as Romance. This is also evident in
+the heatmap, where almost all significant data points are concentrated
+in a single row for Romance predictions rather than along the diagonal.
+
 ## Limitations
+
+The dataset was heavily skewed towards Action and Romance out of sixteen
+genres. This led to major class bias in the prediction of the model. To
+make the model computationally feasible, I had to reduce 96045 unique
+terms to 171 terms, which could have been inadequate for the model to
+learn to predict 16 genres. Last but not least, raw counts could have
+been better fit for this model than TF-IDF because TF-IDT gives very
+small decimals, which could have impacted the probabilities that the
+model generated.
+
+## AI Acknowledgement
+
+Claude and Gemini AI were used for to debug and create some of the
+regular expressions in text cleaning. Gemini AI was also used to consult
+about Naive Bayes models and debug the recipe.
