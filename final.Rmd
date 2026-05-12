@@ -33,6 +33,8 @@ library(tidytext)
 library(lubridate)
 library(tibble)
 library(textstem)
+library(naivebayes)
+library(discrim)
 ```
 
 ## Data Frames
@@ -220,8 +222,8 @@ test_data <- testing(genre_split)
 I chose a decision tree model because the data is complex and non-linear. We have 169 DTM terms and would not assume linear relationship between those word features and genre. An unconstrained decision tree with 169 predictors grew too deep and was computationally prohibitive to run. Therefore, we set tree_depth = 10 and min_n = 20 to limit tree complexity. tree_depth = 10 caps how many levels the tree can grow, and min_n = 20 requires at least 20 observations at a node before it can split further
 
 ```{r}
-tree_model <- decision_tree(tree_depth = 10, min_n = 20) %>%
-  set_engine("rpart") %>%
+nb_model <- naive_Bayes() %>%
+  set_engine("naivebayes") %>%
   set_mode("classification")
 ```
 
@@ -229,14 +231,14 @@ tree_model <- decision_tree(tree_depth = 10, min_n = 20) %>%
 ### Build a Workflow
 
 ```{r}
-tree_workflow <- workflow() %>%
-  add_model(tree_model) %>%
-  add_formula(final_genre ~ .)  # use all other columns as predictors (all the word features)
+nb_workflow <- workflow() %>%
+  add_model(nb_model) %>%
+  add_formula(final_genre ~ .)
 ```
 
 ### Fit the model
 
 ```{r}
-tree_fit <- fit(tree_workflow, data = train_data)
+nb_fit <- fit(nb_workflow, data = train_data)
 ```
 

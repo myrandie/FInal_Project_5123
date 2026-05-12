@@ -39,6 +39,8 @@ library(tidytext)
 library(lubridate)
 library(tibble)
 library(textstem)
+library(naivebayes)
+library(discrim)
 ```
 
 ## Data Frames
@@ -263,6 +265,7 @@ join the outcome categories (labels).
 
 ``` r
 dtm_df <- as.data.frame(as.matrix(dtm_reduced))
+colnames(dtm_df) <- make.names(colnames(dtm_df))
 head(dtm_df, 2)
 ```
 
@@ -293,9 +296,9 @@ head(dtm_df, 2)
     ##            trouble movie attempt learn couple criminal student wealthy tell
     ## tt0357912        0     0       0     0      0        0       0       0    0
     ## tt11690880       0     0       0     0      0        0       0       0    0
-    ##            evil beautiful break girl night relationship crime journey join
-    ## tt0357912     0         0     0    0     0            0     0       0    0
-    ## tt11690880    0         0     0    0     0            0     0       0    0
+    ##            evil beautiful break. girl night relationship crime journey join
+    ## tt0357912     0         0      0    0     0            0     0       0    0
+    ## tt11690880    0         0      0    0     0            0     0       0    0
     ##            local american survive event girlfriend brother house involve find
     ## tt0357912      0        0       0     0          0       0     0       0    0
     ## tt11690880     0        0       0     0          0       0     0       0    0
@@ -360,9 +363,9 @@ head(dtm_df, 2)
     ##   trouble movie attempt learn couple criminal student wealthy tell evil
     ## 1       0     0       0     0      0        0       0       0    0    0
     ## 2       0     0       0     0      0        0       0       0    0    0
-    ##   beautiful break girl night relationship crime journey join local american
-    ## 1         0     0    0     0            0     0       0    0     0        0
-    ## 2         0     0    0     0            0     0       0    0     0        0
+    ##   beautiful break. girl night relationship crime journey join local american
+    ## 1         0      0    0     0            0     0       0    0     0        0
+    ## 2         0      0    0     0            0     0       0    0     0        0
     ##   survive event girlfriend brother house involve find plan investigate police
     ## 1       0     0          0       0     0       0    0    0           0      0
     ## 2       0     0          0       0     0       0    0    0           0      0
@@ -427,6 +430,7 @@ Now, we will create a bar graph for genres
 ggplot(dtm_df, aes(x = final_genre, fill = factor(final_genre))) +
   geom_bar() +
   theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(
     title = "Bar Graphs for Different Genres",
     ylab = "Count",
@@ -435,3 +439,56 @@ ggplot(dtm_df, aes(x = final_genre, fill = factor(final_genre))) +
 ```
 
 ![](final_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+
+As we can see in the bar graph and table above, this dataset is not
+balanced. When class imbalance happens, the accuracy could be misleading
+because the common class (such as action) would be more represented than
+other classes during data training. Therefore, the results might skew
+towards the class with more data.
+
+### Create a train/test split
+
+We will use an 80/20 split and set seed to 123. We will also use
+stratification so that the class imbalance is reserved in both training
+and testing sets.
+
+``` r
+set.seed(123)
+genre_split <- initial_split(dtm_df, prop = 0.8, strata = final_genre)
+train_data <- training(genre_split)
+test_data <- testing(genre_split)
+```
+
+### Specify the model
+
+I chose a decision tree model because the data is complex and
+non-linear. We have 169 DTM terms and would not assume linear
+relationship between those word features and genre. An unconstrained
+decision tree with 169 predictors grew too deep and was computationally
+prohibitive to run. Therefore, we set tree_depth = 10 and min_n = 20 to
+limit tree complexity. tree_depth = 10 caps how many levels the tree can
+grow, and min_n = 20 requires at least 20 observations at a node before
+it can split further
+
+``` r
+nb_model <- naive_Bayes() %>%
+  set_engine("naivebayes") %>%
+  set_mode("classification")
+```
+
+### Build a Workflow
+
+``` r
+nb_workflow <- workflow() %>%
+  add_model(nb_model) %>%
+  add_formula(final_genre ~ .)
+```
+
+### Fit the model
+
+``` r
+nb_fit <- fit(nb_workflow, data = train_data)
+```
+
+    ## Warning: naive_bayes(): Feature movie_id - zero probabilities are present.
+    ## Consider Laplace smoothing.
