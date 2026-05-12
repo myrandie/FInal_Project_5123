@@ -9,6 +9,7 @@ miranda_moe
 - [Prepping Data Frames to build classification
   model](#prepping-data-frames-to-build-classification-model)
 - [Building Classification Model](#building-classification-model)
+- [Limitations](#limitations)
 
 In this project, we will if we can build a classification model to learn
 features of model descriptions to predict genre it represents. We will
@@ -461,14 +462,12 @@ test_data <- testing(genre_split)
 
 ### Specify the model
 
-I chose a decision tree model because the data is complex and
-non-linear. We have 169 DTM terms and would not assume linear
-relationship between those word features and genre. An unconstrained
-decision tree with 169 predictors grew too deep and was computationally
-prohibitive to run. Therefore, we set tree_depth = 10 and min_n = 20 to
-limit tree complexity. tree_depth = 10 caps how many levels the tree can
-grow, and min_n = 20 requires at least 20 observations at a node before
-it can split further
+I chose a Naive Bayes model for this classification. I initially
+considered a decision tree, but the data with 171 predictors and 16
+genre categories made it computationally hard. Naive bayes is better
+suited for text classification because it assumes conditional indepdence
+between the predictor pairs. This also allows the model to proce much
+faster than a decision tree.
 
 ``` r
 nb_model <- naive_Bayes() %>%
@@ -589,4 +588,6 @@ nb_preds %>%
     ## Scale for fill is already present.
     ## Adding another scale for fill, which will replace the existing scale.
 
-![](final_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](final_files/figure-gfm/unnamed-chunk-14-1.png)<!-- --> \## Results
+
+## Limitations
