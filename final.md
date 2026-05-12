@@ -476,12 +476,26 @@ nb_model <- naive_Bayes() %>%
   set_mode("classification")
 ```
 
+### Create a recipe
+
+There are so many columns that have 0, so we will filter them out by
+creating a recipe
+
+``` r
+nb_recipe <- recipe(final_genre ~ ., data = train_data) %>%
+  update_role(movie_id, new_role = "id") %>%
+  step_zv(all_predictors())
+```
+
 ### Build a Workflow
+
+We remove movie_id from the data frame because that data is not needed
+for our trainiing model to learn.
 
 ``` r
 nb_workflow <- workflow() %>%
   add_model(nb_model) %>%
-  add_formula(final_genre ~ .)
+  add_recipe(nb_recipe)
 ```
 
 ### Fit the model
@@ -490,5 +504,10 @@ nb_workflow <- workflow() %>%
 nb_fit <- fit(nb_workflow, data = train_data)
 ```
 
-    ## Warning: naive_bayes(): Feature movie_id - zero probabilities are present.
-    ## Consider Laplace smoothing.
+### Generate predictions for model
+
+``` r
+nb_preds <- predict(nb_fit, test_data, type = "prob") %>%
+  bind_cols(predict(nb_fit, test_data)) %>%
+  bind_cols(test_data %>% dplyr::select(movie_id, final_genre))
+```
